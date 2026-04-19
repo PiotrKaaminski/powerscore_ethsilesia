@@ -1,0 +1,169 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.5.xsd">
+
+    <changeSet id="1" author="PD">
+        <createTable tableName="identity_documents">
+            <column name="identity_document_id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" primaryKeyName="identity_documents_pk"/>
+            </column>
+            <column name="type" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="number" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+        <createTable tableName="clients">
+            <column name="client_id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" primaryKeyName="clients_pk"/>
+            </column>
+            <column name="first_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="birthdate" type="date">
+                <constraints nullable="false"/>
+            </column>
+            <column name="nationality" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="email" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="phone_number" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="identity_document_id" type="uuid">
+                <constraints references="identity_documents(identity_document_id)" foreignKeyName="clients_identity_document_id_fk"/>
+            </column>
+        </createTable>
+        <createTable tableName="verifications">
+            <column name="verification_id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" primaryKeyName="verification_pk"/>
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="client_id" type="uuid">
+                <constraints references="clients(client_id)" foreignKeyName="verifications_client_id_fk"/>
+            </column>
+            <column name="identity_document_id" type="uuid">
+                <constraints nullable="false" references="identity_documents(identity_document_id)" foreignKeyName="verifications_identity_document_id_fk"/>
+            </column>
+            <column name="start_date" type="timestamp">
+                <constraints nullable="false"/>
+            </column>
+            <column name="finish_date" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="2" author="PK">
+        <addColumn tableName="identity_documents">
+            <column name="document_image" type="bytea"/>
+            <column name="image_uploaded" type="boolean" defaultValue="false">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="3" author="PD">
+        <addColumn tableName="verifications">
+            <column name="kyc_verification_status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bank_verification_status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="ai_summary_status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="bank_verification_approved" type="boolean"/>
+        </addColumn>
+        <createTable tableName="open_banking_reports">
+            <column name="open_banking_report_id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" primaryKeyName="open_banking_reports_pk"/>
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="temporary_data" type="varchar(255)"/>
+        </createTable>
+    </changeSet>
+    <changeSet id="4" author="PD">
+        <addColumn tableName="verifications">
+            <column name="open_banking_report_id" type="uuid">
+                <constraints references="open_banking_reports(open_banking_report_id)" foreignKeyName="verifications_open_banking_report_id_fk"/>
+            </column>
+        </addColumn>
+        <createTable tableName="ai_summaries">
+            <column name="ai_summary_id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" primaryKeyName="ai_summaries_pk"/>
+            </column>
+            <column name="status" type="varchar">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet id="5" author="PK">
+        <renameColumn tableName="verifications" oldColumnName="ai_summary_status" newColumnName="ai_recommendation_status"/>
+        <addColumn tableName="verifications">
+            <column name="final_summary_status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="6" author="PD">
+        <renameTable oldTableName="ai_summaries" newTableName="ai_recommendations"/>
+        <renameColumn tableName="ai_recommendations" oldColumnName="ai_summary_id" newColumnName="ai_recommendation_id"/>
+
+        <addColumn tableName="verifications">
+            <column name="ai_recommendation_id" type="uuid">
+                <constraints references="ai_recommendations(ai_recommendation_id)" foreignKeyName="verifications_ai_recommendation_id_fk"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="7" author="Junie">
+        <createTable tableName="final_decisions">
+            <column name="final_decision_id" type="uuid" defaultValueComputed="gen_random_uuid()">
+                <constraints primaryKey="true" primaryKeyName="final_decisions_pk"/>
+            </column>
+            <column name="status" type="varchar(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="decision_data" type="varchar(255)"/>
+        </createTable>
+
+        <addColumn tableName="verifications">
+            <column name="final_decision_id" type="uuid">
+                <constraints references="final_decisions(final_decision_id)" foreignKeyName="verifications_final_decision_id_fk"/>
+            </column>
+        </addColumn>
+    </changeSet>
+    <changeSet id="8" author="PD">
+        <addColumn tableName="final_decisions">
+            <column name="agreement_type" type="varchar(255)"/>
+            <column name="is_accepted" type="boolean"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="9" author="PD">
+        <modifyDataType tableName="final_decisions" columnName="decision_data" newDataType="clob"/>
+    </changeSet>
+    <changeSet id="10" author="PK">
+        <addColumn tableName="open_banking_reports">
+            <column name="session_id" type="text"/>
+            <column name="session_id_signature" type="text"/>
+            <column name="owner_external_id" type="text"/>
+            <column name="command_id" type="text"/>
+            <column name="report_data" type="jsonb"/>
+        </addColumn>
+    </changeSet>
+    <changeSet id="11" author="PK">
+        <addColumn tableName="ai_recommendations">
+            <column name="recommendation_data" type="jsonb"/>
+        </addColumn>
+    </changeSet>
+</databaseChangeLog>
