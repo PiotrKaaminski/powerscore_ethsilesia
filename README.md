@@ -7,6 +7,7 @@ odpowiedniej formy umowy (regular lub pre-paid)
 * w pierwszym kroku klient uzupełnia dane osobowe oraz wysyła zdjęcie swojego dowodu osobistego
 * w drugim kroku klient opcjonalnie wyraża zgodę na pobranie informacji z jego konta bankowego za pomocą open banking (integracja z kontomatik)
 * w trzecim kroku model AI analizuje dane osobiste oraz bankowe a następnie ocenia klienta w skali 1-1000, proponuje model umowy oraz uzasadnia swoją decyzję
+* w czwartym kroku klient oczekuje na decyzję pracownika, pracownik musi w szczegółach weryfikacji przeanalizować dane oraz podjąć decyzję o odrzuceniu lub o akceptacji umowy wraz z podaniem formy umowy
 
 # Architektura
 aplikacja przeglądarkowa + REST api
